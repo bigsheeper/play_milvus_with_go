@@ -10,12 +10,12 @@ import (
 )
 
 var (
-	NB = 1000000
-	ID = 0
-	PartitionNum = 1
-	PerFileRows = 100000
+	NB               = 1000000
+	ID               = 0
+	PartitionNum     = 1
+	PerFileRows      = 100000
 	CurPartitionName = DefaultPartitionName
-	PartitionCnt = 0
+	PartitionCnt     = 0
 )
 
 func Insert(client milvusClient.Client, dataset, indexType string) {
@@ -23,21 +23,21 @@ func Insert(client milvusClient.Client, dataset, indexType string) {
 	defer cancel()
 
 	pk := &entity.Field{
-		Name: "id",
+		Name:       "id",
 		PrimaryKey: true,
-		AutoID: false,
-		DataType: entity.FieldTypeInt64,
+		AutoID:     false,
+		DataType:   entity.FieldTypeInt64,
 	}
 	vec := &entity.Field{
-		Name: VecFieldName,
-		DataType: entity.FieldTypeFloatVector,
+		Name:       VecFieldName,
+		DataType:   entity.FieldTypeFloatVector,
 		TypeParams: map[string]string{"dim": strconv.Itoa(Dim)},
 	}
 	schema := &entity.Schema{
 		CollectionName: dataset,
-		Description: dataset,
-		AutoID: false,
-		Fields: []*entity.Field{pk, vec},
+		Description:    dataset,
+		AutoID:         false,
+		Fields:         []*entity.Field{pk, vec},
 	}
 
 	has, err := client.HasCollection(context.Background(), dataset)
@@ -75,18 +75,18 @@ func Insert(client milvusClient.Client, dataset, indexType string) {
 			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipHNSWIndex(), false); err != nil {
 				panic(err)
 			}
-		}else if indexType == "IVF_FLAT" {
+		} else if indexType == "IVF_FLAT" {
 			if err = client.CreateIndex(ctx, dataset, VecFieldName, NewTaipIVFFLATIndex(), false); err != nil {
 				panic(err)
 			}
-		}else if indexType == "FLAT" || indexType == "" {
+		} else if indexType == "FLAT" || indexType == "" {
 			// nothing to do
 		}
 		// 2. Insert data
 		for i := 0; i < PartitionNum; i++ {
 			for _, partition := range partitionNames {
 				CurPartitionName = partition
-				for j := 0; j < NB; j+=PerFileRows {
+				for j := 0; j < NB; j += PerFileRows {
 					_, err = client.Insert(ctx, dataset, partition,
 						generateInertData(TaipDataPath, PerFileRows, "Int64"), generateInertData(TaipDataPath, i, "FloatVector"))
 					if err != nil {
@@ -97,24 +97,24 @@ func Insert(client milvusClient.Client, dataset, indexType string) {
 				}
 			}
 		}
-	}else if dataset == "sift" {
+	} else if dataset == "sift" {
 		// 1. Create index
 		if indexType == "HNSW" {
 			if err = client.CreateIndex(ctx, dataset, VecFieldName, NewSiftHNSWIndex(), false); err != nil {
 				panic(err)
 			}
-		}else if indexType == "IVF_FLAT" {
+		} else if indexType == "IVF_FLAT" {
 			if err = client.CreateIndex(ctx, dataset, VecFieldName, NewSiftIVFFLATIndex(), false); err != nil {
 				panic(err)
 			}
-		}else if indexType == "FLAT" || indexType == "" {
+		} else if indexType == "FLAT" || indexType == "" {
 			// nothing to do
 		}
 		// 2. Insert data
 		for i := 0; i < PartitionNum; i++ {
 			for _, partition := range partitionNames {
 				CurPartitionName = partition
-				for j := 0; j < NB; j+=PerFileRows {
+				for j := 0; j < NB; j += PerFileRows {
 					_, err = client.Insert(ctx, dataset, partition,
 						generateInertData(SiftDataPath, PerFileRows, "Int64"), generateInertData(SiftDataPath, i, "FloatVector"))
 					if err != nil {
@@ -165,7 +165,7 @@ func generatedInsertEntities(dataPath string, num int) [][]float32 {
 	bits := ReadBytesFromFile(PerFileRows, filePath)
 	vectors := make([][]float32, 0)
 	for i := 0; i < PerFileRows; i++ {
-		vector := BytesToFloat32(bits[i*Dim*4:(i+1)*Dim*4])
+		vector := BytesToFloat32(bits[i*Dim*4 : (i+1)*Dim*4])
 		//fmt.Println(len(vector))
 		vectors = append(vectors, vector)
 	}
