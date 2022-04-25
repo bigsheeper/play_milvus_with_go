@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	NB               = 1000000
+	NB               = 10000000
 	ID               = 0
-	PartitionNum     = 1
+	PartitionNum     = 10
 	PerFileRows      = 100000
 	CurPartitionName = DefaultPartitionName
 	PartitionCnt     = 0
@@ -111,18 +111,20 @@ func Insert(client milvusClient.Client, dataset, indexType string) {
 			// nothing to do
 		}
 		// 2. Insert data
+		insertTimesPerPartition := NB / PartitionNum / PerFileRows
+		fmt.Println("insertTimesPerPartition:", insertTimesPerPartition)
 		for i := 0; i < PartitionNum; i++ {
-			for _, partition := range partitionNames {
-				CurPartitionName = partition
-				for j := 0; j < NB; j += PerFileRows {
-					_, err = client.Insert(ctx, dataset, partition,
-						generateInertData(SiftDataPath, PerFileRows, "Int64"), generateInertData(SiftDataPath, i, "FloatVector"))
-					if err != nil {
-						panic(err)
-					}
-					ID += PerFileRows
-					PartitionCnt += PerFileRows
+			CurPartitionName = partitionNames[i]
+			for j := 0; j < insertTimesPerPartition; j++ {
+				datasetFileIndex := i*insertTimesPerPartition + j
+				fmt.Printf("insert %d rows to Partition %s, datasetFileIndex = %d\n", PerFileRows, partitionNames[i], datasetFileIndex)
+				_, err = client.Insert(ctx, dataset, partitionNames[i],
+					generateInertData(SiftDataPath, PerFileRows, "Int64"), generateInertData(SiftDataPath, datasetFileIndex, "FloatVector"))
+				if err != nil {
+					panic(err)
 				}
+				ID += PerFileRows
+				PartitionCnt += PerFileRows
 			}
 		}
 	}
@@ -152,6 +154,7 @@ func generateInertData(dataPath string, step int, t string) entity.Column {
 			intData[i] = int64(i)
 		}
 		colData = entity.NewColumnInt64("id", intData)
+		fmt.Println("gen int64, ID start from: ", ID)
 	case "FloatVector":
 		colData = entity.NewColumnFloatVector(VecFieldName, Dim, generatedInsertEntities(dataPath, step))
 	default:
@@ -162,6 +165,7 @@ func generateInertData(dataPath string, step int, t string) entity.Column {
 
 func generatedInsertEntities(dataPath string, num int) [][]float32 {
 	filePath := generateInsertPath(dataPath, num)
+	fmt.Println("read dataset file:", filePath)
 	bits := ReadBytesFromFile(PerFileRows, filePath)
 	vectors := make([][]float32, 0)
 	for i := 0; i < PerFileRows; i++ {

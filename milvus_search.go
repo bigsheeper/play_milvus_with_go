@@ -5,7 +5,6 @@ import (
 	"fmt"
 	milvusClient "github.com/xiaocai2333/milvus-sdk-go/v2/client"
 	"github.com/xiaocai2333/milvus-sdk-go/v2/entity"
-	"sync"
 	"time"
 )
 
@@ -44,28 +43,28 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 			vectors := generatedEntities(dataPath, nq)
 			for _, topK := range TopK {
 				allQPS = 0.0
-				var wg sync.WaitGroup
-				wg.Add(process)
-				for g := 0; g < process; g++ {
-					go func() {
-						defer wg.Done()
-						cost := int64(0)
-						for i := 0; i < RunTime; i++ {
-							start := time.Now()
-							_, err := client.Search(context.Background(), dataset, partitions, "", []string{},
-								vectors, VecFieldName, entity.L2, topK, searchParams, 1)
-							if err != nil {
-								panic(err)
-							}
-							cost += time.Since(start).Microseconds()
-						}
-						avgTime := float64(cost/RunTime) / 1000.0 / 1000.0
-						qps := float64(nq) / avgTime
-						fmt.Printf("average search time: %f， vps: %f \n", avgTime, qps)
-						allQPS += qps
-					}()
+				//var wg sync.WaitGroup
+				//wg.Add(process)
+				//for g := 0; g < process; g++ {
+				//	go func() {
+				//		defer wg.Done()
+				cost := int64(0)
+				for i := 0; i < RunTime; i++ {
+					start := time.Now()
+					_, err := client.Search(context.Background(), dataset, partitions, "", []string{},
+						vectors, VecFieldName, entity.L2, topK, searchParams, 1)
+					if err != nil {
+						panic(err)
+					}
+					cost += time.Since(start).Microseconds()
 				}
-				wg.Wait()
+				avgTime := float64(cost/RunTime) / 1000.0 / 1000.0
+				qps := float64(nq) / avgTime
+				fmt.Printf("average search time: %f， vps: %f \n", avgTime, qps)
+				allQPS += qps
+				//}()
+				//}
+				//wg.Wait()
 				fmt.Printf("nq = %d, topK = %d, param = %d, goroutine = %d, vps = %f \n", nq, topK, p, process, allQPS)
 			}
 		}
