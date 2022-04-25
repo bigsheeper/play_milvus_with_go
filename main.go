@@ -19,10 +19,9 @@ import (
 )
 
 const (
-	CollectionName       = "taip"
+	CollectionName       = "sift_0"
 	DefaultPartitionName = "_default"
-	RunTime      = 10000
-	VecFieldName = "vec"
+	VecFieldName         = "vec"
 
 	TaipDataPath = "/data/milvus/raw_data/zjlab"
 	SiftDataPath = "/data/milvus/raw_data/sift"
@@ -33,10 +32,10 @@ var (
 	Dim = 768
 )
 
-func createClient(addr string) milvusClient.Client{
+func createClient(addr string) milvusClient.Client {
 	opts := []grpc.DialOption{grpc.WithInsecure(),
-		grpc.WithBlock(),                //block connect until healthy or timeout
-		grpc.WithTimeout(20*time.Second)} // set connect timeout to 2 Second
+		grpc.WithBlock(),                   //block connect until healthy or timeout
+		grpc.WithTimeout(20 * time.Second)} // set connect timeout to 2 Second
 	client, err := milvusClient.NewGrpcClient(context.Background(), addr, opts...)
 	if err != nil {
 		panic(err)
@@ -86,7 +85,7 @@ func generatedEntities(dataPath string, nq int) []entity.Vector {
 	bits := ReadBytesFromFile(nq, filePath)
 	vectors := make([]entity.Vector, 0)
 	for i := 0; i < nq; i++ {
-		var vector entity.FloatVector = BytesToFloat32(bits[i*Dim*4:(i+1)*Dim*4])
+		var vector entity.FloatVector = BytesToFloat32(bits[i*Dim*4 : (i+1)*Dim*4])
 		//fmt.Println(len(vector))
 		vectors = append(vectors, vector)
 	}
@@ -94,7 +93,7 @@ func generatedEntities(dataPath string, nq int) []entity.Vector {
 }
 
 func generateInsertFile(x int) string {
-	return "binary_" + strconv.Itoa(Dim) +"d_" + fmt.Sprintf("%05d", x) + ".npy"
+	return "binary_" + strconv.Itoa(Dim) + "d_" + fmt.Sprintf("%05d", x) + ".npy"
 }
 
 func generateInsertPath(dataPath string, x int) string {
@@ -131,9 +130,9 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "host", "172.18.50.4:19530", "milvus addr")
-	flag.StringVar(&dataset, "dataset", "taip", "dataset for test")
-	flag.StringVar(&indexType, "index", "FLAT", "index type for collection, HNSW | IVF_FLAT | FLAT")
+	flag.StringVar(&addr, "host", "localhost:19530", "milvus addr")
+	flag.StringVar(&dataset, "dataset", "sift", "dataset for test")
+	flag.StringVar(&indexType, "index", "HNSW", "index type for collection, HNSW | IVF_FLAT | FLAT")
 	flag.StringVar(&operation, "op", "", "what do you want to do")
 	flag.Var(newSliceValue([]string{}, &partitions), "p", "partitions which you want to load")
 	flag.IntVar(&process, "process", 1, "goroutines for test")
@@ -148,7 +147,7 @@ func main() {
 	defer client.Close()
 	if dataset == "taip" || dataset == "zc" {
 		Dim = 768
-	}else if dataset == "sift" {
+	} else if dataset == "sift" {
 		Dim = 128
 	}
 	if operation == "Insert" {

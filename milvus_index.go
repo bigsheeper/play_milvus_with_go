@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	CurIndexType = "HNSW"
-	CurIndexRows = int64(0)
+	CurIndexType   = "HNSW"
+	CurIndexRows   = int64(0)
 	TotalIndexRows = int64(0)
 )
 
@@ -30,11 +30,19 @@ func CreateIndex(client milvusClient.Client, dataset string, indexType string) {
 			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipHNSWIndex(), true); err != nil {
 				panic(err)
 			}
-		}else if entity.IndexType(indexType) == entity.IvfFlat {
+		} else if entity.IndexType(indexType) == entity.IvfFlat {
 			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipIVFFLATIndex(), true); err != nil {
 				panic(err)
 			}
 		}
+	} else if dataset == "sift" {
+		if entity.IndexType(indexType) == entity.HNSW {
+			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewSiftHNSWIndex(), true); err != nil {
+				panic(err)
+			}
+		}
+	} else {
+		panic("unknown index type when CreateIndex")
 	}
 	go printCreateIndexProgress(ctx)
 	confirmIndexComplete(ctx, client, dataset, VecFieldName)
@@ -65,7 +73,7 @@ func confirmIndexComplete(ctx context.Context, client milvusClient.Client, datas
 		if err != nil {
 			panic(err)
 		}
-		time.Sleep(2*time.Second)
+		time.Sleep(2 * time.Second)
 	}
 	return
 }
@@ -87,7 +95,7 @@ func NewTaipIVFFLATIndex() *entity.IndexIvfFlat {
 }
 
 func NewSiftHNSWIndex() *entity.IndexHNSW {
-	indexParams, err := entity.NewIndexHNSW(entity.L2, 16, 256)
+	indexParams, err := entity.NewIndexHNSW(entity.L2, 12, 150)
 	if err != nil {
 		panic(err)
 	}

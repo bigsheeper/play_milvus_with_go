@@ -9,31 +9,33 @@ import (
 	"time"
 )
 
+const RunTime = 10000
+
 var (
 	TopK = []int{50}
-	NQ = []int{1}
-	EF = []int{50}
+	NQ   = []int{1}
+	EF   = []int{50}
+
 	NPROBE = []int{1, 10, 1024}
 	allQPS = 0.0
 )
-
 
 func Search(client milvusClient.Client, dataset, indexType string, process int, partitions []string) {
 	var pList []int
 	if indexType == "HNSW" {
 		pList = EF
-	}else if indexType == "IVF_FLAT" {
+	} else if indexType == "IVF_FLAT" {
 		pList = NPROBE
-	}else {
+	} else {
 		panic("illegal index type")
 	}
 
 	var dataPath string
 	if dataset == "taip" || dataset == "zc" {
 		dataPath = TaipDataPath
-	}else if dataset == "sift" {
+	} else if dataset == "sift" {
 		dataPath = SiftDataPath
-	}else {
+	} else {
 		panic("wrong dataset")
 	}
 	for _, p := range pList {
@@ -57,8 +59,8 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 							}
 							cost += time.Since(start).Microseconds()
 						}
-						avgTime := float64(cost/RunTime)/1000.0/1000.0
-						qps := float64(nq)/avgTime
+						avgTime := float64(cost/RunTime) / 1000.0 / 1000.0
+						qps := float64(nq) / avgTime
 						fmt.Printf("average search time: %f， vps: %f \n", avgTime, qps)
 						allQPS += qps
 					}()
@@ -70,7 +72,6 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 	}
 }
 
-
 func newSearchParams(p int, indexType string) entity.SearchParam {
 	if indexType == "HNSW" {
 		searchParams, err := entity.NewIndexHNSWSearchParam(p)
@@ -78,7 +79,7 @@ func newSearchParams(p int, indexType string) entity.SearchParam {
 			panic(err)
 		}
 		return searchParams
-	}else if indexType == "IVF_FLAT" {
+	} else if indexType == "IVF_FLAT" {
 		searchParams, err := entity.NewIndexIvfFlatSearchParam(p)
 		if err != nil {
 			panic(err)
