@@ -127,6 +127,9 @@ var (
 	process    int
 	operation  string
 	partitions []string
+
+	argNQ                 int
+	argSearchPartitionNum int
 )
 
 func init() {
@@ -136,6 +139,8 @@ func init() {
 	flag.StringVar(&operation, "op", "", "what do you want to do")
 	flag.Var(newSliceValue([]string{}, &partitions), "p", "partitions which you want to load")
 	flag.IntVar(&process, "process", 1, "goroutines for test")
+	flag.IntVar(&argNQ, "nq", 1, "search nq")
+	flag.IntVar(&argSearchPartitionNum, "search_partition_num", 10, "number of partitions to search")
 }
 
 func main() {

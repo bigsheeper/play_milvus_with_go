@@ -12,7 +12,7 @@ const RunTime = 10000
 
 var (
 	TopK = []int{50}
-	NQ   = []int{1}
+	NQ   = []int{argNQ}
 	EF   = []int{50}
 
 	NPROBE = []int{1, 10, 1024}
@@ -37,6 +37,7 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 	} else {
 		panic("wrong dataset")
 	}
+	searchPartitions := partitions[:argSearchPartitionNum]
 	for _, p := range pList {
 		searchParams := newSearchParams(p, indexType)
 		for _, nq := range NQ {
@@ -51,7 +52,7 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 				cost := int64(0)
 				for i := 0; i < RunTime; i++ {
 					start := time.Now()
-					_, err := client.Search(context.Background(), dataset, partitions, "", []string{},
+					_, err := client.Search(context.Background(), dataset, searchPartitions, "", []string{},
 						vectors, VecFieldName, entity.L2, topK, searchParams, 1)
 					if err != nil {
 						panic(err)
