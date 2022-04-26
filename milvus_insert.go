@@ -45,10 +45,11 @@ func Insert(client milvusClient.Client, dataset, indexType string) {
 		panic(err)
 	}
 	if has {
-		fmt.Println("Collection exist, drop it.")
-		if err = client.DropCollection(context.Background(), dataset); err != nil {
-			panic(err)
-		}
+		panic("unexpected existed collection")
+		//fmt.Println("Collection exist, drop it.")
+		//if err = client.DropCollection(context.Background(), dataset); err != nil {
+		//	panic(err)
+		//}
 	}
 	if err = client.CreateCollection(context.Background(), schema, 1); err != nil {
 		panic(err)
