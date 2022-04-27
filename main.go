@@ -24,7 +24,7 @@ const (
 	VecFieldName         = "vec"
 
 	TaipDataPath = "/data/milvus/raw_data/zjlab"
-	SiftDataPath = "/data/milvus/raw_data/sift"
+	SiftDataPath = "/home/sheep/data-mnt/milvus/raw_data/sift10m"
 	QueryFile    = "query.npy"
 )
 
@@ -130,6 +130,7 @@ var (
 
 	argNQ                 int
 	argSearchPartitionNum int
+	argSearchRunTimes     int64
 )
 
 func init() {
@@ -141,6 +142,7 @@ func init() {
 	flag.IntVar(&process, "process", 1, "goroutines for test")
 	flag.IntVar(&argNQ, "nq", 1, "search nq")
 	flag.IntVar(&argSearchPartitionNum, "search_partition_num", 10, "number of partitions to search")
+	flag.Int64Var(&argSearchRunTimes, "run_times", 10, "times of running search")
 }
 
 func main() {

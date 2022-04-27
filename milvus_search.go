@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const RunTime = 10000
+//const RunTime = 10000
 
 var (
 	TopK = []int{50}
@@ -50,7 +50,7 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 				//	go func() {
 				//		defer wg.Done()
 				cost := int64(0)
-				for i := 0; i < RunTime; i++ {
+				for i := 0; i < int(argSearchRunTimes); i++ {
 					start := time.Now()
 					_, err := client.Search(context.Background(), dataset, searchPartitions, "", []string{},
 						vectors, VecFieldName, entity.L2, topK, searchParams, 1)
@@ -59,7 +59,7 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 					}
 					cost += time.Since(start).Microseconds()
 				}
-				avgTime := float64(cost/RunTime) / 1000.0 / 1000.0
+				avgTime := float64(cost/argSearchRunTimes) / 1000.0 / 1000.0
 				qps := float64(nq) / avgTime
 				fmt.Printf("average search time: %f， vps: %f \n", avgTime, qps)
 				allQPS += qps
