@@ -192,7 +192,6 @@ func ShowInfos(client milvusClient.Client, dataset string) {
 	fmt.Println("collectionSchema:", desColRsp.Schema)
 	fmt.Println("PhysicalChannels:", desColRsp.PhysicalChannels)
 	fmt.Println("VirtualChannels:", desColRsp.VirtualChannels)
-	fmt.Println("Loaded:", desColRsp.Loaded)
 
 	fmt.Println("\nShowPartitions...")
 	showParRsp, err := client.ShowPartitions(ctx, collectionName)
