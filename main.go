@@ -164,7 +164,6 @@ func main() {
 	} else if operation == "Search" {
 		fmt.Printf("process: %d, nq: %d, search_partition_num: %d, run_times: %d\n", process, argNQ,
 			argSearchPartitionNum, argSearchRunTimes)
-		globalPartitionNames = []string{"_default", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"}
 		Search(client, dataset, indexType, process, globalPartitionNames)
 	} else if operation == "Index" {
 		CreateIndex(client, dataset, indexType)
