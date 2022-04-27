@@ -147,8 +147,10 @@ func init() {
 
 func main() {
 	flag.Parse()
-	fmt.Printf("host: %s, dataset: %s, operation: %s, index type: %s, process: %d, partitions: %s \n", addr, dataset,
-		operation, indexType, process, partitions)
+	fmt.Printf("host: %s, dataset: %s, index: %s, op: %s, partitions: %s\n", addr, dataset,
+		indexType, operation, partitions)
+	fmt.Printf("process: %d, nq: %d, search_partition_num: %d, run_times: %d\n", process, argNQ,
+		argSearchPartitionNum, argSearchRunTimes)
 
 	client := createClient(addr)
 	defer client.Close()
