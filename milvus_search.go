@@ -12,7 +12,7 @@ import (
 
 var (
 	TopK = []int{50}
-	NQ   = []int{argNQ}
+	NQ   = []int{}
 	EF   = []int{50}
 
 	NPROBE = []int{1, 10, 1024}
@@ -37,6 +37,8 @@ func Search(client milvusClient.Client, dataset, indexType string, process int, 
 	} else {
 		panic("wrong dataset")
 	}
+	// hack
+	NQ = []int{argNQ}
 	searchPartitions := partitions[:argSearchPartitionNum]
 	for _, p := range pList {
 		searchParams := newSearchParams(p, indexType)

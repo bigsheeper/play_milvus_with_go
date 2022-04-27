@@ -121,16 +121,18 @@ func (s *Strings) String() string {
 }
 
 var (
-	addr       string
-	dataset    string
-	indexType  string
-	process    int
-	operation  string
-	partitions []string
+	addr      string
+	dataset   string
+	indexType string
+	process   int
+	operation string
+	//partitions []string
 
 	argNQ                 int
 	argSearchPartitionNum int
 	argSearchRunTimes     int64
+
+	globalPartitionNames []string
 )
 
 func init() {
@@ -138,7 +140,7 @@ func init() {
 	flag.StringVar(&dataset, "dataset", "sift", "dataset for test")
 	flag.StringVar(&indexType, "index", "HNSW", "index type for collection, HNSW | IVF_FLAT | FLAT")
 	flag.StringVar(&operation, "op", "", "what do you want to do")
-	flag.Var(newSliceValue([]string{}, &partitions), "p", "partitions which you want to load")
+	//flag.Var(newSliceValue([]string{}, &partitions), "p", "partitions which you want to load")
 	flag.IntVar(&process, "process", 1, "goroutines for test")
 	flag.IntVar(&argNQ, "nq", 1, "search nq")
 	flag.IntVar(&argSearchPartitionNum, "search_partition_num", 10, "number of partitions to search")
@@ -147,10 +149,8 @@ func init() {
 
 func main() {
 	flag.Parse()
-	fmt.Printf("host: %s, dataset: %s, index: %s, op: %s, partitions: %s\n", addr, dataset,
-		indexType, operation, partitions)
-	fmt.Printf("process: %d, nq: %d, search_partition_num: %d, run_times: %d\n", process, argNQ,
-		argSearchPartitionNum, argSearchRunTimes)
+	fmt.Printf("host: %s, dataset: %s, index: %s, op: %s\n", addr, dataset,
+		indexType, operation)
 
 	client := createClient(addr)
 	defer client.Close()
@@ -161,18 +161,19 @@ func main() {
 	}
 	if operation == "Insert" {
 		Insert(client, dataset, indexType)
-	}
-	if operation == "Search" {
-		Search(client, dataset, indexType, process, partitions)
-	}
-	if operation == "Index" {
+	} else if operation == "Search" {
+		fmt.Printf("process: %d, nq: %d, search_partition_num: %d, run_times: %d\n", process, argNQ,
+			argSearchPartitionNum, argSearchRunTimes)
+		globalPartitionNames = []string{"_default", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"}
+		Search(client, dataset, indexType, process, globalPartitionNames)
+	} else if operation == "Index" {
 		CreateIndex(client, dataset, indexType)
-	}
-	if operation == "Load" {
-		Load(client, dataset, partitions)
-	}
-	if operation == "Release" {
-		Release(client, dataset, partitions)
+	} else if operation == "Load" {
+		Load(client, dataset)
+	} else if operation == "Release" {
+		Release(client, dataset)
+	} else {
+		panic(fmt.Sprintf("Invalid op: %s, op should be one of ['Insert', 'Index', 'Load', 'Search', 'Release']", operation))
 	}
 	return
 }

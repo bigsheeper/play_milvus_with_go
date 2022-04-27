@@ -68,6 +68,7 @@ func Insert(client milvusClient.Client, dataset, indexType string) {
 			panic(err)
 		}
 	}
+	globalPartitionNames = partitionNames
 
 	go printInsertProgress(ctx)
 	if dataset == "taip" || dataset == "zc" {
