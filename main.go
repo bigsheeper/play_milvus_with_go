@@ -172,8 +172,47 @@ func main() {
 		Load(client, dataset)
 	} else if operation == "Release" {
 		Release(client, dataset)
+	} else if operation == "Show" {
+		ShowInfos(client, dataset)
 	} else {
 		panic(fmt.Sprintf("Invalid op: %s, op should be one of ['Insert', 'Index', 'Load', 'Search', 'Release']", operation))
 	}
 	return
+}
+
+func ShowInfos(client milvusClient.Client, dataset string) {
+	collectionName := dataset
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	fmt.Println("\nDescribeCollection...")
+	desColRsp, err := client.DescribeCollection(ctx, collectionName)
+	fmt.Println("collectionName:", desColRsp.Name)
+	fmt.Println("collectionID:", desColRsp.ID)
+	fmt.Println("collectionSchema:", desColRsp.Schema)
+	fmt.Println("PhysicalChannels:", desColRsp.PhysicalChannels)
+	fmt.Println("VirtualChannels:", desColRsp.VirtualChannels)
+	fmt.Println("Loaded:", desColRsp.Loaded)
+
+	fmt.Println("\nShowPartitions...")
+	showParRsp, err := client.ShowPartitions(ctx, collectionName)
+	if err != nil {
+		panic(err)
+	}
+	for _, par := range showParRsp {
+		fmt.Println(par)
+	}
+
+	getVectorField := func(schema *entity.Schema) *entity.Field {
+		for _, field := range schema.Fields {
+			if field.DataType == entity.FieldTypeFloatVector {
+				return field
+			}
+		}
+		panic("No vector field found!")
+	}
+
+	fmt.Println("\nDescribeIndex...")
+	desIndexRsp, err := client.DescribeIndex(ctx, collectionName, getVectorField(desColRsp.Schema).Name)
+	fmt.Println(desIndexRsp[0])
 }
