@@ -2,16 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
-	milvusClient "github.com/xiaocai2333/milvus-sdk-go/v2/client"
-	"github.com/xiaocai2333/milvus-sdk-go/v2/entity"
-	"time"
-)
-
-var (
-	CurIndexType = "HNSW"
-	CurIndexRows = int64(0)
-	TotalIndexRows = int64(0)
+	milvusClient "github.com/milvus-io/milvus-sdk-go/v2/client"
+	"github.com/milvus-io/milvus-sdk-go/v2/entity"
 )
 
 func CreateIndex(client milvusClient.Client, dataset string, indexType string) {
@@ -23,49 +15,17 @@ func CreateIndex(client milvusClient.Client, dataset string, indexType string) {
 		}
 		return
 	}
-	CurIndexType = indexType
 	_ = client.Flush(ctx, dataset, false)
-	if dataset == "taip" || dataset == "zc" {
+	if dataset == "taip" || dataset == "sift" {
 		if entity.IndexType(indexType) == entity.HNSW {
-			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipHNSWIndex(), true); err != nil {
+			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipHNSWIndex(), false); err != nil {
 				panic(err)
 			}
-		}else if entity.IndexType(indexType) == entity.IvfFlat {
-			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipIVFFLATIndex(), true); err != nil {
+		} else if entity.IndexType(indexType) == entity.IvfFlat {
+			if err := client.CreateIndex(ctx, dataset, VecFieldName, NewTaipIVFFLATIndex(), false); err != nil {
 				panic(err)
 			}
 		}
-	}
-	go printCreateIndexProgress(ctx)
-	confirmIndexComplete(ctx, client, dataset, VecFieldName)
-	return
-}
-
-func printCreateIndexProgress(ctx context.Context) {
-	ticker := time.NewTicker(time.Second)
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println("\nCreate index done!")
-			return
-		case <-ticker.C:
-			fmt.Printf("Indexing %s:[%-8d/%-9d]\r", CurIndexType, CurIndexRows, TotalIndexRows)
-		}
-	}
-}
-
-func confirmIndexComplete(ctx context.Context, client milvusClient.Client, dataset string, fieldName string) {
-	var err error
-	TotalIndexRows, CurIndexRows, err = client.GetIndexBuildProgress(ctx, dataset, fieldName)
-	if err != nil {
-		panic(err)
-	}
-	for CurIndexRows != TotalIndexRows {
-		TotalIndexRows, CurIndexRows, err = client.GetIndexBuildProgress(ctx, dataset, fieldName)
-		if err != nil {
-			panic(err)
-		}
-		time.Sleep(2*time.Second)
 	}
 	return
 }
