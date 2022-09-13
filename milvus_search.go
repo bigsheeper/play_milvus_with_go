@@ -13,7 +13,7 @@ var (
 	TopK   = []int{50}
 	NQ     = []int{1}
 	EF     = []int{50}
-	NPROBE = []int{1, 10, 1024}
+	NPROBE = []int{1}
 	allQPS = 0.0
 )
 

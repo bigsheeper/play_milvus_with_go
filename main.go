@@ -21,7 +21,7 @@ import (
 const (
 	CollectionName       = "taip"
 	DefaultPartitionName = "_default"
-	RunTime              = 3000
+	RunTime              = 1000
 	VecFieldName         = "vec"
 
 	TaipDataPath = "/home/sheep/data-mnt/milvus/raw_data/zjlab"
@@ -133,7 +133,7 @@ var (
 func init() {
 	flag.StringVar(&addr, "host", "localhost:19530", "milvus addr")
 	flag.StringVar(&dataset, "dataset", "sift", "dataset for test")
-	flag.StringVar(&indexType, "index", "IVF_FLAT", "index type for collection, HNSW | IVF_FLAT | FLAT")
+	flag.StringVar(&indexType, "index", "HNSW", "index type for collection, HNSW | IVF_FLAT | FLAT")
 	flag.StringVar(&operation, "op", "", "what do you want to do")
 	flag.Var(newSliceValue([]string{}, &partitions), "p", "partitions which you want to load")
 	flag.IntVar(&process, "process", 200, "goroutines for test")

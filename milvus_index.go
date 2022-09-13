@@ -31,7 +31,7 @@ func CreateIndex(client milvusClient.Client, dataset string, indexType string) {
 }
 
 func NewTaipHNSWIndex() *entity.IndexHNSW {
-	indexParams, err := entity.NewIndexHNSW(entity.L2, 16, 256)
+	indexParams, err := entity.NewIndexHNSW(entity.L2, 12, 150)
 	if err != nil {
 		panic(err)
 	}
@@ -47,7 +47,7 @@ func NewTaipIVFFLATIndex() *entity.IndexIvfFlat {
 }
 
 func NewSiftHNSWIndex() *entity.IndexHNSW {
-	indexParams, err := entity.NewIndexHNSW(entity.L2, 16, 256)
+	indexParams, err := entity.NewIndexHNSW(entity.L2, 12, 150)
 	if err != nil {
 		panic(err)
 	}
